@@ -1,6 +1,6 @@
 # Relativistic Stochastic Gradient Descent
 
-Relativistic Stochastic Gradient Descent (RSGD) is an optimization method (or more specifically, an SGD method) extended from the Relativistic Hamiltonian Monte Carlo, developed in the paper [Relativistic Monte Carlo](https://arxiv.org/abs/1609.04388), by Xiaoyu Lu, Valerio Perrone, Leonard Hasenclever, Yee Whye Teh and Sebastian J. Vollmer. Its formulae have similarities with other popular SGD methods like Adam and RMSProp, but the difference is that it is derived from the relativistic dynamics of a Hamiltonian system, and is a stochastic optimization algorithm starting from a Bayesian setup.
+Relativistic Stochastic Gradient Descent (RSGD) is an optimization method extended from the Relativistic Hamiltonian Monte Carlo, developed in the paper [Relativistic Monte Carlo](https://arxiv.org/abs/1609.04388), by Xiaoyu Lu, Valerio Perrone, Leonard Hasenclever, Yee Whye Teh and Sebastian J. Vollmer. Its formulae have similarities with other popular SGD methods like Adam and RMSProp, but the difference is that it is derived from the relativistic dynamics of a Hamiltonian system, and is a stochastic optimization algorithm starting from a Bayesian setup.
 
 The script **RSGD.py** contains the implementation of RSGD. By importing **RSGD.py**, the RSGD optimizer will be able to be called in the same way as other optimization algorithms in TensorFlow. For example, **train_step = tf.train.RSGDOptimizer().minimize(cross_entropy)** would work, similar to **train_step = tf.train.AdamOptimizer().minimize(cross_entropy)**.
 
