@@ -66,8 +66,6 @@ b_fc2 = bias_variable([10])
 
 y_conv = tf.matmul(h_fc1, W_fc2) + b_fc2
 keep_prob = tf.placeholder(tf.float32)
-#h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)
-#y_conv = tf.matmul(h_fc1_drop, W_fc2) + b_fc2
 
 cross_entropy = tf.reduce_mean(
     tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y_conv))
@@ -75,7 +73,6 @@ cross_entropy = tf.reduce_mean(
 ### Define the relevant optimizer
 train_step = tf.train.RSGDOptimizer(learning_rate=0.2, m=0.5, c=0.5).minimize(cross_entropy)
 #train_step = tf.train.AdamOptimizer(learning_rate=0.001).minimize(cross_entropy)
-#train_step = tf.train.RMSPropOptimizer(learning_rate=0.001).minimize(cross_entropy)
 
 correct_prediction = tf.equal(tf.argmax(y_conv,1), tf.argmax(y_,1))
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
