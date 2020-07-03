@@ -6,7 +6,6 @@ import os
 import sys
 import random
 import pickle as pickle
-#import cPickle as pickle
 
 gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.33)
 
@@ -210,171 +209,164 @@ def data_augmentation(batch):
 
 
 
-if __name__ == '__main__':
+train_x, train_y, test_x, test_y = prepare_data()
+train_x, test_x = data_preprocessing(train_x, test_x)
 
 
-    train_x, train_y, test_x, test_y = prepare_data()
-    train_x, test_x = data_preprocessing(train_x, test_x)
+# define placeholder x, y_ , keep_prob, learning_rate
+x = tf.placeholder(tf.float32,[None, image_size, image_size, 3])
+y_ = tf.placeholder(tf.float32, [None, class_num])
+keep_prob = tf.placeholder(tf.float32)
+learning_rate = tf.placeholder(tf.float32)
+train_flag = tf.placeholder(tf.bool)
 
 
-    # define placeholder x, y_ , keep_prob, learning_rate
-    x = tf.placeholder(tf.float32,[None, image_size, image_size, 3])
-    y_ = tf.placeholder(tf.float32, [None, class_num])
-    keep_prob = tf.placeholder(tf.float32)
-    learning_rate = tf.placeholder(tf.float32)
-    train_flag = tf.placeholder(tf.bool)
+# build_VGG16 network
+W_conv1_1 = tf.get_variable('conv1_1', shape=[3, 3, 3, 64], initializer=tf.contrib.keras.initializers.he_normal())
+b_conv1_1 = bias_variable([64])
+output = tf.nn.relu(batch_norm(conv2d(x, W_conv1_1) + b_conv1_1))
 
 
-    # build_VGG16 network
-    W_conv1_1 = tf.get_variable('conv1_1', shape=[3, 3, 3, 64], initializer=tf.contrib.keras.initializers.he_normal())
-    b_conv1_1 = bias_variable([64])
-    output = tf.nn.relu(batch_norm(conv2d(x, W_conv1_1) + b_conv1_1))
+W_conv1_2 = tf.get_variable('conv1_2', shape=[3, 3, 64, 64], initializer=tf.contrib.keras.initializers.he_normal())
+b_conv1_2 = bias_variable([64])
+output = tf.nn.relu(batch_norm(conv2d(output, W_conv1_2) + b_conv1_2))
+output = max_pool(output, 2, 2, "pool1")
 
 
-    W_conv1_2 = tf.get_variable('conv1_2', shape=[3, 3, 64, 64], initializer=tf.contrib.keras.initializers.he_normal())
-    b_conv1_2 = bias_variable([64])
-    output = tf.nn.relu(batch_norm(conv2d(output, W_conv1_2) + b_conv1_2))
-    output = max_pool(output, 2, 2, "pool1")
+W_conv2_1 = tf.get_variable('conv2_1', shape=[3, 3, 64, 128], initializer=tf.contrib.keras.initializers.he_normal())
+b_conv2_1 = bias_variable([128])
+output = tf.nn.relu(batch_norm(conv2d(output, W_conv2_1) + b_conv2_1))
 
 
-    W_conv2_1 = tf.get_variable('conv2_1', shape=[3, 3, 64, 128], initializer=tf.contrib.keras.initializers.he_normal())
-    b_conv2_1 = bias_variable([128])
-    output = tf.nn.relu(batch_norm(conv2d(output, W_conv2_1) + b_conv2_1))
+W_conv2_2 = tf.get_variable('conv2_2', shape=[3, 3, 128, 128], initializer=tf.contrib.keras.initializers.he_normal())
+b_conv2_2 = bias_variable([128])
+output = tf.nn.relu(batch_norm(conv2d(output, W_conv2_2) + b_conv2_2))
+output = max_pool(output, 2, 2, "pool2")
 
 
-    W_conv2_2 = tf.get_variable('conv2_2', shape=[3, 3, 128, 128], initializer=tf.contrib.keras.initializers.he_normal())
-    b_conv2_2 = bias_variable([128])
-    output = tf.nn.relu(batch_norm(conv2d(output, W_conv2_2) + b_conv2_2))
-    output = max_pool(output, 2, 2, "pool2")
+W_conv3_1 = tf.get_variable('conv3_1', shape=[3, 3, 128, 256], initializer=tf.contrib.keras.initializers.he_normal())
+b_conv3_1 = bias_variable([256])
+output = tf.nn.relu( batch_norm(conv2d(output,W_conv3_1) + b_conv3_1))
 
 
-    W_conv3_1 = tf.get_variable('conv3_1', shape=[3, 3, 128, 256], initializer=tf.contrib.keras.initializers.he_normal())
-    b_conv3_1 = bias_variable([256])
-    output = tf.nn.relu( batch_norm(conv2d(output,W_conv3_1) + b_conv3_1))
+W_conv3_2 = tf.get_variable('conv3_2', shape=[3, 3, 256, 256], initializer=tf.contrib.keras.initializers.he_normal())
+b_conv3_2 = bias_variable([256])
+output = tf.nn.relu(batch_norm(conv2d(output, W_conv3_2) + b_conv3_2))
 
 
-    W_conv3_2 = tf.get_variable('conv3_2', shape=[3, 3, 256, 256], initializer=tf.contrib.keras.initializers.he_normal())
-    b_conv3_2 = bias_variable([256])
-    output = tf.nn.relu(batch_norm(conv2d(output, W_conv3_2) + b_conv3_2))
+W_conv3_3 = tf.get_variable('conv3_3', shape=[3, 3, 256, 256], initializer=tf.contrib.keras.initializers.he_normal())
+b_conv3_3 = bias_variable([256])
+output = tf.nn.relu( batch_norm(conv2d(output, W_conv3_3) + b_conv3_3))
+output = max_pool(output, 2, 2, "pool3")
 
 
-    W_conv3_3 = tf.get_variable('conv3_3', shape=[3, 3, 256, 256], initializer=tf.contrib.keras.initializers.he_normal())
-    b_conv3_3 = bias_variable([256])
-    output = tf.nn.relu( batch_norm(conv2d(output, W_conv3_3) + b_conv3_3))
-    output = max_pool(output, 2, 2, "pool3")
+W_conv4_1 = tf.get_variable('conv4_1', shape=[3, 3, 256, 512], initializer=tf.contrib.keras.initializers.he_normal())
+b_conv4_1 = bias_variable([512])
+output = tf.nn.relu(batch_norm(conv2d(output, W_conv4_1) + b_conv4_1))
 
 
-    W_conv4_1 = tf.get_variable('conv4_1', shape=[3, 3, 256, 512], initializer=tf.contrib.keras.initializers.he_normal())
-    b_conv4_1 = bias_variable([512])
-    output = tf.nn.relu(batch_norm(conv2d(output, W_conv4_1) + b_conv4_1))
+W_conv4_2 = tf.get_variable('conv4_2', shape=[3, 3, 512, 512], initializer=tf.contrib.keras.initializers.he_normal())
+b_conv4_2 = bias_variable([512])
+output = tf.nn.relu(batch_norm(conv2d(output, W_conv4_2) + b_conv4_2))
 
 
-    W_conv4_2 = tf.get_variable('conv4_2', shape=[3, 3, 512, 512], initializer=tf.contrib.keras.initializers.he_normal())
-    b_conv4_2 = bias_variable([512])
-    output = tf.nn.relu(batch_norm(conv2d(output, W_conv4_2) + b_conv4_2))
+W_conv4_3 = tf.get_variable('conv4_3', shape=[3, 3, 512, 512], initializer=tf.contrib.keras.initializers.he_normal())
+b_conv4_3 = bias_variable([512])
+output = tf.nn.relu(batch_norm(conv2d(output, W_conv4_3) + b_conv4_3))
+output = max_pool(output, 2, 2)
 
 
-    W_conv4_3 = tf.get_variable('conv4_3', shape=[3, 3, 512, 512], initializer=tf.contrib.keras.initializers.he_normal())
-    b_conv4_3 = bias_variable([512])
-    output = tf.nn.relu(batch_norm(conv2d(output, W_conv4_3) + b_conv4_3))
-    output = max_pool(output, 2, 2)
+W_conv5_1 = tf.get_variable('conv5_1', shape=[3, 3, 512, 512], initializer=tf.contrib.keras.initializers.he_normal())
+b_conv5_1 = bias_variable([512])
+output = tf.nn.relu(batch_norm(conv2d(output, W_conv5_1) + b_conv5_1))
 
 
-    W_conv5_1 = tf.get_variable('conv5_1', shape=[3, 3, 512, 512], initializer=tf.contrib.keras.initializers.he_normal())
-    b_conv5_1 = bias_variable([512])
-    output = tf.nn.relu(batch_norm(conv2d(output, W_conv5_1) + b_conv5_1))
+W_conv5_2 = tf.get_variable('conv5_2', shape=[3, 3, 512, 512], initializer=tf.contrib.keras.initializers.he_normal())
+b_conv5_2 = bias_variable([512])
+output = tf.nn.relu(batch_norm(conv2d(output, W_conv5_2) + b_conv5_2))
 
 
-    W_conv5_2 = tf.get_variable('conv5_2', shape=[3, 3, 512, 512], initializer=tf.contrib.keras.initializers.he_normal())
-    b_conv5_2 = bias_variable([512])
-    output = tf.nn.relu(batch_norm(conv2d(output, W_conv5_2) + b_conv5_2))
+W_conv5_3 = tf.get_variable('conv5_3', shape=[3, 3, 512, 512], initializer=tf.contrib.keras.initializers.he_normal())
+b_conv5_3 = bias_variable([512])
+output = tf.nn.relu(batch_norm(conv2d(output, W_conv5_3) + b_conv5_3))
+output = tf.reshape(output, [-1, 2*2*512])
 
 
-    W_conv5_3 = tf.get_variable('conv5_3', shape=[3, 3, 512, 512], initializer=tf.contrib.keras.initializers.he_normal())
-    b_conv5_3 = bias_variable([512])
-    output = tf.nn.relu(batch_norm(conv2d(output, W_conv5_3) + b_conv5_3))
-    output = tf.reshape(output, [-1, 2*2*512])
+W_fc1 = tf.get_variable('fc1', shape=[2048, 4096], initializer=tf.contrib.keras.initializers.he_normal())
+b_fc1 = bias_variable([4096])
+output = tf.nn.relu(batch_norm(tf.matmul(output, W_fc1) + b_fc1) )
+output = tf.nn.dropout(output, keep_prob)
 
 
-    W_fc1 = tf.get_variable('fc1', shape=[2048, 4096], initializer=tf.contrib.keras.initializers.he_normal())
-    b_fc1 = bias_variable([4096])
-    output = tf.nn.relu(batch_norm(tf.matmul(output, W_fc1) + b_fc1) )
-    output = tf.nn.dropout(output, keep_prob)
+W_fc2 = tf.get_variable('fc7', shape=[4096, 4096], initializer=tf.contrib.keras.initializers.he_normal())
+b_fc2 = bias_variable([4096])
+output = tf.nn.relu(batch_norm(tf.matmul(output, W_fc2) + b_fc2))
+output = tf.nn.dropout(output, keep_prob)
 
 
-    W_fc2 = tf.get_variable('fc7', shape=[4096, 4096], initializer=tf.contrib.keras.initializers.he_normal())
-    b_fc2 = bias_variable([4096])
-    output = tf.nn.relu(batch_norm(tf.matmul(output, W_fc2) + b_fc2))
-    output = tf.nn.dropout(output, keep_prob)
+W_fc3 = tf.get_variable('fc3', shape=[4096, 10], initializer=tf.contrib.keras.initializers.he_normal())
+b_fc3 = bias_variable([10])
+output = tf.nn.relu(batch_norm(tf.matmul(output, W_fc3) + b_fc3))
+
+# loss function: cross_entropy
+# train_step: training operation
+cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=output))
+l2 = tf.add_n([tf.nn.l2_loss(var) for var in tf.trainable_variables()])
+train_step = tf.train.RSGDOptimizer(learning_rate=0.3,m=0.5,c=10/3,D=1.5).\
+            minimize(cross_entropy)
+
+correct_prediction = tf.equal(tf.argmax(output, 1), tf.argmax(y_, 1))
+accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
 
-    W_fc3 = tf.get_variable('fc3', shape=[4096, 10], initializer=tf.contrib.keras.initializers.he_normal())
-    b_fc3 = bias_variable([10])
-    output = tf.nn.relu(batch_norm(tf.matmul(output, W_fc3) + b_fc3))
+with tf.Session(config=tf.ConfigProto(gpu_options=gpu_options)) as sess:
+    obj_loss=[]
+    obj_acc=[]
+    obj_test_loss=[]
+    obj_test_acc=[]
+    sess.run(tf.global_variables_initializer())
 
-    # loss function: cross_entropy
-    # train_step: training operation
-    cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=output))
-    l2 = tf.add_n([tf.nn.l2_loss(var) for var in tf.trainable_variables()])
-    train_step = tf.train.RSGDOptimizer(learning_rate=0.3,m=0.5,c=10/3,D=1.5).\
-                minimize(cross_entropy)
+    for ep in range(1, 200+1):
+        pre_index = 0
+        train_acc = 0.0
+        train_loss = 0.0
+        print("\n epoch %d/%d:" % (ep, 200))
+        for it in range(1,iterations):
+            batch_x = train_x[pre_index:pre_index+batch_size]
+            batch_y = train_y[pre_index:pre_index+batch_size]
+            batch_x = data_augmentation(batch_x)
+            sess.run(train_step, feed_dict={x: batch_x, y_: batch_y, keep_prob: dropout_rate,
+                         train_flag: True})
+            pre_index += batch_size
 
-    correct_prediction = tf.equal(tf.argmax(output, 1), tf.argmax(y_, 1))
-    accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+        acc = 0.0
+        loss = 0.0
+        pre_index = 0
+        add = 100
+        for it in range(500):
+            batch_x = train_x[pre_index:pre_index+add]
+            batch_y = train_y[pre_index:pre_index+add]
+            pre_index = pre_index + add
+            loss_, acc_  = sess.run([cross_entropy, accuracy],
+                            feed_dict={x: batch_x, y_: batch_y, keep_prob: 1.0, train_flag: False})
+            loss += loss_ / 500.0
+            acc += acc_ / 500.0
+        obj_loss.append(loss)
+        obj_acc.append(acc)
 
+        acc = 0.0
+        loss = 0.0
+        pre_index = 0
+        add = 100
+        for it in range(100):
+            batch_x = test_x[pre_index:pre_index+add]
+            batch_y = test_y[pre_index:pre_index+add]
+            pre_index = pre_index + add
+            loss_, acc_  = sess.run([cross_entropy, accuracy],
+                            feed_dict={x: batch_x, y_: batch_y, keep_prob: 1.0, train_flag: False})
+            loss += loss_ / 100.0
+            acc += acc_ / 100.0
+        obj_test_loss.append(loss)
+        obj_test_acc.append(acc)
 
-    with tf.Session(config=tf.ConfigProto(gpu_options=gpu_options)) as sess:
-        obj=[]
-        obj_a=[]
-        obj_tce=[]
-        obj_ta=[]
-        sess.run(tf.global_variables_initializer())
-
-        for ep in range(1, 200+1):
-            pre_index = 0
-            train_acc = 0.0
-            train_loss = 0.0
-            print("\n epoch %d/%d:" % (ep, 200))
-            for it in range(1,iterations):
-                batch_x = train_x[pre_index:pre_index+batch_size]
-                batch_y = train_y[pre_index:pre_index+batch_size]
-                batch_x = data_augmentation(batch_x)
-                sess.run(train_step, feed_dict={x: batch_x, y_: batch_y, keep_prob: dropout_rate,
-                             train_flag: True})
-                pre_index += batch_size
-
-            acc = 0.0
-            loss = 0.0
-            pre_index = 0
-            add = 100
-            for it in range(500):
-                batch_x = train_x[pre_index:pre_index+add]
-                batch_y = train_y[pre_index:pre_index+add]
-                pre_index = pre_index + add
-                loss_, acc_  = sess.run([cross_entropy, accuracy],
-                                feed_dict={x: batch_x, y_: batch_y, keep_prob: 1.0, train_flag: False})
-                loss += loss_ / 500.0
-                acc += acc_ / 500.0
-            obj.append(loss)
-            obj_a.append(acc)
-
-            acc = 0.0
-            loss = 0.0
-            pre_index = 0
-            add = 100
-            for it in range(100):
-                batch_x = test_x[pre_index:pre_index+add]
-                batch_y = test_y[pre_index:pre_index+add]
-                pre_index = pre_index + add
-                loss_, acc_  = sess.run([cross_entropy, accuracy],
-                                feed_dict={x: batch_x, y_: batch_y, keep_prob: 1.0, train_flag: False})
-                loss += loss_ / 100.0
-                acc += acc_ / 100.0
-            obj_tce.append(loss)
-            obj_ta.append(acc)
-
-            print("test accuracy %g"%acc)
-        print(obj)        # training log loss through 200 epochs
-        print(obj_a)      # training accuracy through 200 epochs
-        print(obj_tce)    # testing log loss through 200 epochs
-        print(obj_ta)     # testing accuracy through 200 epochs
+        print("test accuracy %g"%acc)
