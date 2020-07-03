@@ -8,4 +8,4 @@ The script **RSGDc.py** contains the componentwise/elementwise version of RSGD, 
 
 The script **RSHD.py** is the TensorFlow implementation of the optimization algorithm in another relevant paper, namely [Hamiltonian Descent Methods](https://arxiv.org/abs/1809.05042) by Chris J. Maddison, Daniel Paulin, Yee Whye Teh, Brendan O'Donoghue and Arnaud Doucet. In the paper, a family of optimization methods is introduced, namely Hamiltonian Descent. What this script implements is the version of Hamiltonian Descent with relativistic kinetic energy, which we call Relativistic Stochastic Hamiltonian Descent (RSHD). It has similarities with RSGD, but has different update rules.
 
-**MNIST_cnn.py** and **CIFAR_vgg16.py** are implementations of RSGD on MNIST (with the c32-c64-1024 CNN architecture) and CIFAR10 (with the VGG16 architecture).
+**MNIST_cnn.py** and **CIFAR_vgg16.py** are examples of using RSGD for optimization on MNIST classification (with the c32-c64-1024 CNN architecture) and CIFAR10 classification (with the VGG16 architecture).
