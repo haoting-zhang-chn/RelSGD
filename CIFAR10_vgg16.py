@@ -43,7 +43,6 @@ def download_data():
             if count == 0:
                 start_time = time.time()
                 return
-            #duration = time.time() - start_time
             duration = time.time() - start_time + 0.001
             progress_size = int(count * block_size)
             speed = int(progress_size / (1024 * duration))
@@ -101,11 +100,9 @@ def prepare_data():
     download_data()
     data_dir = './cifar-10-batches-py'
     image_dim = image_size * image_size * img_channels
-    #meta = unpickle(data_dir + '/batches.meta')
     meta = unpickle('./cifar-10-batches-py/batches.meta')
 
     print(meta)
-    #label_names = meta[b'label_names']
     label_names = meta[b'label_names']
     label_count = len(label_names)
     train_files = ['data_batch_%d' % d for d in range(1, 6)]
